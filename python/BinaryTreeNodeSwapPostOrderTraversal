@@ -1,0 +1,84 @@
+from queue import Queue
+import sys
+
+
+class Node:
+    def __init__(self, data, level):
+        self.data = data
+        self.level = level
+        self.left = None
+        self.right = None
+
+
+def create_tree(indexes):
+    root_queue = Queue()
+    root_top = Node(indexes.pop(0), 1)
+    root_queue.put(root_top)
+
+    while len(indexes) > 0:
+        left_data = indexes.pop(0)
+        right_data = indexes.pop(0)
+        root_current = root_queue.get()
+
+        if left_data != -1:
+            left_node = Node(left_data, root_current.level + 1)
+            root_current.left = left_node
+            root_queue.put(left_node)
+        if right_data != -1:
+            right_node = Node(right_data, root_current.level + 1)
+            root_current.right = right_node
+            root_queue.put(right_node)
+    return root_top
+
+// Here post order traversal and node swapping
+def post_order_swap(root, k):
+    if not root:
+        return
+
+    post_order_swap(root.left, k)
+    post_order_swap(root.right, k)
+    if root.level % k == 0:
+        root.left, root.right = root.right, root.left
+        return
+
+
+def in_order_print(root, result):
+    if not root:
+        return
+    in_order_print(root.left, result)
+    result.append(root.data)
+    in_order_print(root.right, result)
+
+
+def swap_nodes(indexes, queries):
+    root_top = create_tree(indexes)
+    result = []
+    for k in queries:
+        result_temp = []
+        post_order_swap(root_top, k)
+        in_order_print(root_top, result_temp)
+        result.append(result_temp)
+    return result
+
+
+if __name__ == '__main__':
+    sys.setrecursionlimit(1500)
+
+    n = int(input())
+
+    indexes = [1]
+
+    for _ in range(n):
+        n1, n2 = map(int, input().split())
+        indexes.append(n1)
+        indexes.append(n2)
+
+    queries_count = int(input())
+    queries = []
+
+    for _ in range(queries_count):
+        queries_item = int(input())
+        queries.append(queries_item)
+
+    result = swap_nodes(indexes, queries)
+    print('\n'.join([' '.join(map(str, x)) for x in result]))
